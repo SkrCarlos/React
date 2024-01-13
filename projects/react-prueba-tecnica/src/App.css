@@ -1,0 +1,9 @@
+body {
+  background-color: #282c34;
+  color : #fff;
+}
+
+main {
+  display: grid;
+  place-items: center;
+}
