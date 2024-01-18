@@ -1,19 +1,65 @@
-import responseMovies from '../mocks/whith-results.json'
-// import withoutResults from '../mocks/no-results.json'
+import { useState, useRef, useMemo, useCallback } from 'react'
+import { searchMovies } from '../services/movies'
 
-// const API_KEY = '4037c882'
+export function useMovies ({ search, sort }) {
+  const [movies, setMovies] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+  const previosSearch = useRef(search)
+  
+  //PASAR UNA FUNCION CON USEMEMO
+
+  // const getMovies = useMemo( () => {
+  //   return async ({ search }) => {
+  //     if( previosSearch.current === search ) return
+      
+  //     try {
+  //       setLoading(true)
+  //       setError(null)
+  //       previosSearch.current = search
+  //       const newMovies = await searchMovies({ search })
+  //       setMovies(newMovies)
+  //     } catch (error) {
+  //       setError(error.message)
+  //     } finally {
+  //       setLoading(false)
+  //     }
+  //   }
+  // }, [])
+
+  //PASAR UNA FUNCION CON USECALLBACK
+
+  const getMovies = useCallback( 
+    async ({ search }) => {
+    if( previosSearch.current === search ) return
+    
+    try {
+      setLoading(true)
+      setError(null)
+      previosSearch.current = search
+      const newMovies = await searchMovies({ search })
+      setMovies(newMovies)
+    } catch (error) {
+      setError(error.message)
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+  
+
+  // const sortedMovies = sort 
+  //   ? [...movies].sort((a, b) => a.title.localeCompare(b.title))
+  //   : movies
+
+  const sortedMovies = useMemo(() => {
+    return sort 
+      ? [...movies].sort((a, b) => a.title.localeCompare(b.title))
+      : movies
+  }, [movies, sort])
 
 
+  
+  
 
-export function useMovies () {
-  const movies = responseMovies.Search
-
-  const mappedMovies = movies?.map(movie => ({
-      id: movie.imdbID,
-      title: movie.Title,
-      year: movie.Year,
-      image: movie.Poster
-  }))
-
-  return { movies: mappedMovies}
+  return { movies: sortedMovies, getMovies, loading, error}
 }
